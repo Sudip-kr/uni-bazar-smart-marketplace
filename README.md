@@ -168,19 +168,33 @@ These models help maintain structured data management and relationship handling 
 
 Project Structure
 The project follows a modular Django application structure for maintainability and scalability.
-uni_bazar_structure/│├── apps/│   ├── accounts/│   ├── listings/│   ├── chat/│   └── core/│├── static/├── templates/├── media/├── manage.py└── requirements.txt
+uni_bazar_structure/
+├── apps/
+├── accounts/   
+├── listings/  
+├── chat/  
+└── core/
+├── static/
+├── templates/
+├── media/
+├── manage.py
+└── requirements.txt
 The structure separates functionalities into reusable applications for better project organization.
 
 Installation Guide
 Clone Repository
+
 git clone https://github.com/Sudip-kr/uni-bazar-smart-marketplace.git
+
 Open Project Directory
 cd uni-bazar-smart-marketplace
 Create Virtual Environment
 python -m venv venv
 Activate Virtual Environment
 Windows
+
 venv\\Scripts\\activate
+
 Install Required Dependencies
 pip install -r requirements.txt
 Apply Database Migrations
@@ -249,7 +263,9 @@ The Uni Bazar project successfully demonstrates a modern smart campus marketplac
 
 Author
 Developed with dedication by:
+
 Sudipta Kumar Bag
+
 Diploma CSE Student at LPU
 Python Full Stack Development Enthusiast
 
