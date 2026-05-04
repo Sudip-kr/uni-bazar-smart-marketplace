@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<section class="mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Campus Marketplace</h2>
+            <p class="text-muted mb-0">Browse available second-hand student items</p>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'core:home' %}" class="btn btn-outline-dark">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'listings:create_item' %}" class="btn btn-success">+ Add Item</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- SEARCH + FILTER BAR -->
+<section class="mb-4">
+    <div class="card shadow-sm border-0 p-3 p-md-4">
+        <form method="GET">
+            <div class="row g-3 align-items-end">
+
+                <!-- Search -->
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Search</label>
+                    <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Search items...">
+                </div>
+
+                <!-- Category -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Category</label>
+                    <select name="category" class="form-select">
+                        <option value="">All</option>
+                        {% for value, label in category_choices %}
+                            <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Condition -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Condition</label>
+                    <select name="condition" class="form-select">
+                        <option value="">All</option>
+                        {% for value, label in condition_choices %}
+                            <option value="{{ value }}" {% if selected_condition == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Location -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Location</label>
+                    <select name="location_type" class="form-select">
+                        <option value="">All</option>
+                        {% for value, label in location_choices %}
+                            <option value="{{ value }}" {% if selected_location_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sort -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Sort By</label>
+                    <select name="sort" class="form-select">
+                        <option value="">Latest</option>
+                        <option value="price_low" {% if selected_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_high" {% if selected_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-12 d-flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-dark">Apply Filters</button>
+                    <a href="{% url 'listings:item_list' %}" class="btn btn-outline-secondary">Reset</a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- RESULT COUNT -->
+<section class="mb-3">
+    <p class="text-muted mb-0">
+        Showing <strong>{{ items|length }}</strong> item{{ items|length|pluralize }}
+    </p>
+</section>
+
+<!-- ITEMS GRID -->
+{% if items %}
+    <div class="row">
+        {% for item in items %}
+            <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+                <div class="card h-100 shadow-sm border-0 item-card">
+
+                    <!-- Image -->
+                    <div class="position-relative">
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.title }}" style="height: 220px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                                <span class="text-muted">No Image</span>
+                            </div>
+                        {% endif %}
+
+                        <!-- Category Badge -->
+                        <span class="badge bg-dark position-absolute top-0 start-0 m-2">
+                            {{ item.get_category_display }}
+                        </span>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                            <h5 class="card-title mb-0">{{ item.title|truncatechars:30 }}</h5>
+                            <span class="fw-bold text-dark">₹{{ item.price }}</span>
+                        </div>
+
+                        <p class="small text-muted mb-2">
+                            {{ item.description|truncatechars:80 }}
+                        </p>
+
+                        <!-- Badges -->
+                        <div class="mb-3 d-flex flex-wrap gap-2">
+                            {% if item.condition == 'new' %}
+                                <span class="badge bg-success-subtle text-dark border">Like New</span>
+                            {% elif item.condition == 'good' %}
+                                <span class="badge bg-primary-subtle text-dark border">Good</span>
+                            {% elif item.condition == 'fair' %}
+                                <span class="badge bg-warning-subtle text-dark border">Fair</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-dark border">Used</span>
+                            {% endif %}
+
+                            {% if item.location_type == 'hostel' %}
+                                <span class="badge bg-info-subtle text-dark border">Hostel</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark border">Day Scholar</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Seller / Location Info -->
+                        <div class="small text-muted mb-3">
+                            <div><strong>Seller:</strong> {{ item.seller.first_name|default:item.seller.username }}</div>
+                            <p><strong>Saved by:</strong> {{ item.wishlist.count }} student{{ item.wishlist.count|pluralize }}</p>
+                            
+                            {% if item.location_type == 'hostel' and item.hostel_name %}
+                                <div><strong>Hostel:</strong> {{ item.hostel_name }}</div>
+                            {% endif %}
+
+                            <div><strong>Posted:</strong> {{ item.created_at|date:"d M Y" }}</div>
+                        </div>
+
+                    <div class="mt-auto d-flex gap-2">
+                        <a href="{% url 'listings:item_detail' item.pk %}" class="btn btn-dark w-100">
+                            View Details
+                        </a>
+                    
+                        {% if user.is_authenticated and user != item.seller %}
+                        <a href="{% url 'listings:toggle_wishlist' item.pk %}"
+                            class="btn {% if user in item.wishlist.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                            ♥
+                        </a>
+                        {% endif %}
+                    </div>
+                    </div>
+
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card border-0 shadow-sm p-5 text-center">
+        <h4 class="fw-bold mb-2">No Matching Items Found</h4>
+        <p class="text-muted mb-3">
+            Try changing your search or filters.
+        </p>
+        <a href="{% url 'listings:item_list' %}" class="btn btn-outline-dark">Clear Filters</a>
+    </div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="messenger-container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+        <div class="sidebar-header">
+            💬 My Chats
+        </div>
+
+        <div class="conversation-list">
+
+            {% for r in rooms %}
+
+                <a href="{% url 'chat:chat_room' r.id %}"
+                   class="conversation-item {% if r.id == room.id %}active-chat{% endif %}">
+
+                    <div class="conversation-avatar">
+                        {{ r.item.title|slice:":1" }}
+                    </div>
+
+                    <div class="conversation-info">
+
+                        <div class="conversation-title">
+                            {{ r.item.title }}
+                        </div>
+
+                        {% if request.user == r.buyer %}
+                            <small>
+                                Seller: {{ r.seller.username }}
+                            </small>
+                        {% else %}
+                            <small>
+                                Buyer: {{ r.buyer.username }}
+                            </small>
+                        {% endif %}
+
+                    </div>
+
+                </a>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <!-- CHAT SECTION -->
+    <div class="chat-section">
+
+        <!-- HEADER -->
+        <div class="chat-header">
+
+            <div>
+
+                <h5 class="mb-0 fw-bold">
+                    {{ room.item.title }}
+                </h5>
+
+                {% if request.user == room.buyer %}
+                    <small>Seller: {{ room.seller.username }}</small>
+                {% else %}
+                    <small>Buyer: {{ room.buyer.username }}</small>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- BODY -->
+        <div id="chat-box" class="chat-body">
+
+            {% for msg in messages %}
+
+                <div class="message-row {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+
+                    <div class="message-bubble">
+
+                        <div>
+                            {{ msg.message }}
+                        </div>
+
+                        <small class="message-time">
+                            {{ msg.timestamp|date:"h:i A" }}
+                        </small>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="chat-footer">
+
+            <input
+                id="message-input"
+                type="text"
+                placeholder="Type a message..."
+            >
+
+            <button onclick="sendMessage()">
+                ➤
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+
+body{
+    background:#eef1f6;
+}
+
+.messenger-container{
+    height:90vh;
+    display:flex;
+    overflow:hidden;
+    border-radius:20px;
+    background:white;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:320px;
+    border-right:1px solid #ddd;
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+}
+
+.sidebar-header{
+    padding:20px;
+    font-size:22px;
+    font-weight:bold;
+    border-bottom:1px solid #eee;
+    background:#111827;
+    color:white;
+}
+
+.conversation-list{
+    overflow-y:auto;
+    flex:1;
+}
+
+.conversation-item{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:16px;
+    text-decoration:none;
+    color:black;
+    transition:0.3s;
+    border-bottom:1px solid #f1f1f1;
+}
+
+.conversation-item:hover{
+    background:#f3f4f6;
+    transform:translateX(4px);
+}
+
+.active-chat{
+    background:#dbeafe;
+}
+
+.conversation-avatar{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:#2563eb;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:20px;
+}
+
+.conversation-title{
+    font-weight:bold;
+}
+
+/* CHAT SECTION */
+
+.chat-section{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.chat-header{
+    padding:18px 22px;
+    background:#111827;
+    color:white;
+}
+
+.chat-body{
+    flex:1;
+    overflow-y:auto;
+    padding:20px;
+    background:#f3f4f6;
+}
+
+.message-row{
+    display:flex;
+    margin-bottom:15px;
+}
+
+.sent{
+    justify-content:flex-end;
+}
+
+.received{
+    justify-content:flex-start;
+}
+
+.message-bubble{
+    max-width:70%;
+    padding:12px 16px;
+    border-radius:18px;
+    word-wrap:break-word;
+    transition:0.2s;
+}
+
+.message-bubble:hover{
+    transform:scale(1.02);
+}
+
+.sent .message-bubble{
+    background:#2563eb;
+    color:white;
+    border-bottom-right-radius:5px;
+}
+
+.received .message-bubble{
+    background:white;
+    border-bottom-left-radius:5px;
+}
+
+.message-time{
+    display:block;
+    margin-top:6px;
+    font-size:11px;
+    opacity:0.7;
+}
+
+/* FOOTER */
+
+.chat-footer{
+    padding:15px;
+    background:white;
+    display:flex;
+    gap:10px;
+    border-top:1px solid #ddd;
+}
+
+.chat-footer input{
+    flex:1;
+    border:none;
+    outline:none;
+    background:#f3f4f6;
+    border-radius:30px;
+    padding:12px 18px;
+}
+
+.chat-footer button{
+    width:50px;
+    height:50px;
+    border:none;
+    border-radius:50%;
+    background:#2563eb;
+    color:white;
+    font-size:20px;
+    transition:0.3s;
+}
+
+.chat-footer button:hover{
+    transform:scale(1.08);
+    background:#1d4ed8;
+}
+
+@media(max-width:768px){
+
+    .sidebar{
+        width:100px;
+    }
+
+    .conversation-info{
+        display:none;
+    }
+
+}
+
+</style>
+
+<script>
+
+const roomId = "{{ room.id }}";
+const username = "{{ request.user.username }}";
+
+const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
+const socket = new WebSocket(
+    protocol + '://' + window.location.host + '/ws/chat/' + roomId + '/'
+);
+
+const chatBox = document.getElementById('chat-box');
+
+function scrollToBottom(){
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+scrollToBottom();
+
+socket.onmessage = function(e){
+
+    const data = JSON.parse(e.data);
+
+    const isMe = data.username === username;
+
+    const currentTime = new Date().toLocaleTimeString([], {
+        hour:'2-digit',
+        minute:'2-digit'
+    });
+
+    const messageHTML = `
+        <div class="message-row ${isMe ? 'sent' : 'received'}">
+
+            <div class="message-bubble">
+
+                <div>${data.message}</div>
+
+                <small class="message-time">
+                    ${currentTime}
+                </small>
+
+            </div>
+
+        </div>
+    `;
+
+    chatBox.insertAdjacentHTML('beforeend', messageHTML);
+
+    scrollToBottom();
+};
+
+function sendMessage(){
+
+    const input = document.getElementById('message-input');
+
+    const message = input.value.trim();
+
+    if(message === '') return;
+
+    socket.send(JSON.stringify({
+        'message': message,
+        'username': username
+    }));
+
+    input.value = '';
+}
+
+document.getElementById("message-input")
+.addEventListener("keypress", function(e){
+
+    if(e.key === "Enter"){
+        sendMessage();
+    }
+
+});
+
+</script>
+
+{% endblock %}

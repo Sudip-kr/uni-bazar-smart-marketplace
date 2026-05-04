@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="feedback-container">
+
+    <!-- HEADER -->
+    <div class="feedback-header">
+
+        <h1>
+            Uni Bazar
+        </h1>
+
+        <p>
+            What problem are you facing?
+        </p>
+
+    </div>
+
+    <!-- FORM -->
+    <div class="feedback-form-box">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <textarea
+                name="comment"
+                maxlength="500"
+                placeholder="Tell us what we should improve..."
+                required
+            ></textarea>
+
+            <button type="submit">
+                Submit Feedback
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- COMMENTS -->
+    <div class="comments-section">
+
+        <h3 class="mb-4">
+            Community Feedback
+        </h3>
+
+        {% for feedback in feedbacks %}
+
+            <div class="comment-card">
+
+                <div class="comment-top">
+
+                    <strong>
+                        {{ feedback.user.username }}
+                    </strong>
+
+                    <small>
+                        {{ feedback.created_at|date:"d M Y • h:i A" }}
+                    </small>
+
+                </div>
+
+                <p>
+                    {{ feedback.comment }}
+                </p>
+
+            </div>
+
+        {% empty %}
+
+            <div class="empty-feedback">
+                No feedback yet.
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<style>
+
+body{
+    background:#f3f4f6;
+}
+
+.feedback-container{
+    max-width:900px;
+    margin:auto;
+    padding:40px 20px;
+}
+
+.feedback-header{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.feedback-header h1{
+    font-size:48px;
+    font-weight:bold;
+    color:#111827;
+}
+
+.feedback-header p{
+    font-size:20px;
+    color:#6b7280;
+}
+
+.feedback-form-box{
+    background:white;
+    padding:30px;
+    border-radius:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    margin-bottom:40px;
+}
+
+.feedback-form-box textarea{
+    width:100%;
+    height:160px;
+    border:none;
+    outline:none;
+    resize:none;
+    background:#f9fafb;
+    border-radius:18px;
+    padding:20px;
+    font-size:16px;
+}
+
+.feedback-form-box button{
+    margin-top:20px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    padding:14px 25px;
+    border-radius:999px;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.feedback-form-box button:hover{
+    background:#1d4ed8;
+    transform:translateY(-4px);
+}
+
+.comment-card{
+    background:white;
+    padding:22px;
+    border-radius:20px;
+    margin-bottom:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.07);
+    transition:0.3s;
+}
+
+.comment-card:hover{
+    transform:translateY(-5px);
+}
+
+.comment-top{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:12px;
+}
+
+.comment-card p{
+    margin:0;
+    line-height:1.7;
+    color:#374151;
+}
+
+.empty-feedback{
+    background:white;
+    padding:40px;
+    border-radius:20px;
+    text-align:center;
+    color:#6b7280;
+}
+
+</style>
+
+{% endblock %}
